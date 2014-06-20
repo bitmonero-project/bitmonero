@@ -303,6 +303,8 @@ void slow_hash_allocate_state(void)
     SetLockPagesPrivilege(GetCurrentProcess(), TRUE);
     hp_state = (uint8_t *) VirtualAlloc(hp_state, MEMORY, MEM_LARGE_PAGES |
                                         MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+#elif defined __APPLE__
+	hp_state = malloc(MEMORY);
 #else
     hp_state = mmap(0, MEMORY, PROT_READ | PROT_WRITE,
                     MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, 0, 0);
@@ -328,6 +330,8 @@ void slow_hash_free_state(void)
     {
 #if defined(_MSC_VER)
         VirtualFree(hp_state, MEMORY, MEM_RELEASE);
+#elif defined __APPLE__
+		free(hp_state);
 #else
         munmap(hp_state, MEMORY);
 #endif
